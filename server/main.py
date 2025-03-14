@@ -1,4 +1,5 @@
-from fastapi import FastAPI # type: ignore
+from fastapi import FastAPI
+from api import mail
 
 app = FastAPI()
 
@@ -6,3 +7,7 @@ app = FastAPI()
 def read_root():
     return {"hello": "world"}
 
+@app.get("/messages/{userId}")
+def getMessagesFrom(userId: str):
+    messages = mail.getMessages(userId)
+    return {"messages": messages}

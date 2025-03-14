@@ -6,11 +6,13 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+
+
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
 
-def main():
+def getMessages(userId: str):
   """Shows basic usage of the Gmail API.
   Lists the user's Gmail labels.
   """
@@ -18,6 +20,7 @@ def main():
   # The file token.json stores the user's access and refresh tokens, and is
   # created automatically when the authorization flow completes for the first
   # time.
+  print(os.getcwd())
   if os.path.exists("token.json"):
     creds = Credentials.from_authorized_user_file("token.json", SCOPES)
   # If there are no (valid) credentials available, let the user log in.
@@ -36,20 +39,19 @@ def main():
   try:
     # Call the Gmail API
     service = build("gmail", "v1", credentials=creds)
-    results = service.users().labels().list(userId="me").execute()
-    labels = results.get("labels", [])
+    results = service.users().messages().list(userId=userId).execute()
+    messagesAPI = service.users().messages()
+    messages = results.get("messages", [])
 
-    if not labels:
-      print("No labels found.")
+    if not messages:
+      print("No messages found.")
       return
-    print("Labels:")
-    for label in labels:
-      print(label["name"])
+    print("Messages:")
+    for message in messages:
+        m = messagesAPI.get(userId=userId, id=message.get("id")).execute()
+        print(m.get("payload").get("headers"))
+        break
 
   except HttpError as error:
     # TODO(developer) - Handle errors from gmail API.
     print(f"An error occurred: {error}")
-
-
-if __name__ == "__main__":
-  main()
