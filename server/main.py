@@ -7,6 +7,10 @@ app = FastAPI()
 def read_root():
     return {"hello": "world"}
 
+@app.get("/auth/google")
+def auth():
+    pass
+
 @app.get("/messages/{userId}")
 def getMessagesFrom(userId: str):
     messages = mail.getMessages(userId)
