@@ -1,11 +1,12 @@
 import logging
-from google_auth_oauthlib.flow import InstalledAppFlow
+from google_auth_oauthlib.flow import Flow, InstalledAppFlow
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
 import os
 import json
 
 # reference: https://developers.google.com/identity/protocols/oauth2/web-server#python
+# reference: https://developers.google.com/identity/protocols/oauth2/web-server#python_2
 
 # Path to client_secrets.json which should contain a JSON document such as:
 # {
@@ -18,24 +19,12 @@ import json
 #   }
 # }
 CLIENTSECRETS_LOCATION = './doc/credentials.json'
-REDIRECT_URI = '<YOUR_REGISTERED_REDIRECT_URI>'
+REDIRECT_URI = 'http://localhost:8000/oauthcallback'
 SCOPES = [
+    'openid',
     'https://www.googleapis.com/auth/gmail.readonly',
     'https://www.googleapis.com/auth/userinfo.email',
-    'https://www.googleapis.com/auth/userinfo.profile',
-    # 'https://www.googleapis.com/auth/gmail.addons.current.action.compose',
-    # 'https://www.googleapis.com/auth/gmail.addons.current.message.action',
-    # 'https://www.googleapis.com/auth/gmail.addons.current.message.metadata',
-    # 'https://www.googleapis.com/auth/gmail.addons.current.message.readonly',
-    # 'https://www.googleapis.com/auth/gmail.labels',
-    # 'https://www.googleapis.com/auth/gmail.send',
-    # 'https://www.googleapis.com/auth/gmail.compose',
-    # 'https://www.googleapis.com/auth/gmail.insert',
-    # 'https://www.googleapis.com/auth/gmail.modify',
-    # 'https://www.googleapis.com/auth/gmail.metadata',
-    # 'https://www.googleapis.com/auth/gmail.settings.basic',
-    # 'https://www.googleapis.com/auth/gmail.settings.sharing',
-    # 'https://mail.google.com/'
+    'https://www.googleapis.com/auth/userinfo.profile'
 ]
 
 class GetCredentialsException(Exception):
@@ -64,13 +53,14 @@ def store_credentials(user_id, credentials):
     # Example: save credentials.to_json() to the database.
     raise NotImplementedError()
 
-def exchange_code(authorization_code):
+def exchange_code(state, code):
     """Exchange an authorization code for OAuth 2.0 credentials."""
-    flow = InstalledAppFlow.from_client_secrets_file(CLIENTSECRETS_LOCATION, SCOPES)
+    flow = Flow.from_client_secrets_file(CLIENTSECRETS_LOCATION, SCOPES, state=state)
     flow.redirect_uri = REDIRECT_URI
     try:
-        credentials = flow.fetch_token(authorization_response=authorization_code)
-        return credentials
+        print("code", code)
+        flow.fetch_token(authorization_response=code)
+        return flow.credentials
     except Exception as error:
         logging.error('An error occurred: %s', error)
         raise CodeExchangeException(None)
@@ -87,15 +77,13 @@ def get_user_info(credentials):
     except Exception as error:
         logging.error('An error occurred: %s', error)
 
-def get_authorization_url(email_address, state):
+def get_authorization_url():
     """Retrieve the authorization URL."""
-    flow = InstalledAppFlow.from_client_secrets_file(CLIENTSECRETS_LOCATION, SCOPES)
-    flow.redirect_uri = "http://localhost"
-    authorization_url, _ = flow.authorization_url(prompt='consent', 
-                                                  access__type = 'offline', 
-                                                  user_id = email_address,
-                                                  state=state,)
-    return authorization_url
+    flow = Flow.from_client_secrets_file(CLIENTSECRETS_LOCATION, SCOPES)
+    flow.redirect_uri = REDIRECT_URI
+    authorization_url, state = flow.authorization_url(prompt='consent', 
+                                                  access__type = 'offline')
+    return authorization_url, state
 
 def get_credentials(authorization_code, state):
     """Retrieve credentials using the provided authorization code."""
@@ -122,14 +110,3 @@ def get_credentials(authorization_code, state):
 
     authorization_url = get_authorization_url(email_address, state)
     raise NoRefreshTokenException(authorization_url)
-
-def get_authorization_code(url):
-    """Use the authorization url to get the authorization code"""
-    pass
-
-def main():
-    url = get_authorization_url("zhib.wang09@gmail.com", None)
-    print("url", url)
-    
-if __name__ == "__main__":
-    main()

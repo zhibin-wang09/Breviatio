@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from api import mail
-from google_auth_oauthlib.flow import InstalledAppFlow
+from fastapi.responses import RedirectResponse
+from api.auth import *
+from starlette.requests import Request
 
 app = FastAPI()
 SCOPES = [
@@ -10,18 +12,24 @@ SCOPES = [
     'https://www.googleapis.com/auth/userinfo.profile'
 ]
 
+STATE_STORAGE = {}
+
 @app.get("/")
 def read_root():
     return {"hello": "world"}
 
 @app.get("/authorize")
 def auth():
-    flow = InstalledAppFlow.from_client_secrets_file('./doc/credentials.json',
-                                                     scopes=SCOPES)
-    flow.redirect_uri = "http://localhost"
-    credentials = flow.run_local_server(open_browser=True)
-    print(f"CREDENTIALS: {credentials}")
-    return {"success"}
+    url, state = get_authorization_url()
+    STATE_STORAGE['state'] = state  
+    return RedirectResponse(url)
+    
+
+@app.get('/oauthcallback')
+def oauthcallback(request: Request):
+    credentials = exchange_code(STATE_STORAGE['state'], str(request.url))
+    # TODO: Store into database
+    return {'success'}
     
 
 @app.get("/messages/{userId}")

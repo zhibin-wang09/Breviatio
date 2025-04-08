@@ -1,4 +1,9 @@
 Todos:
-    ☐ redirect user to 
+    ☐ set up database
+    ☐ session storage
+    ☐ credential storage 
+    ☐ generate jwt token(to exchange for credential storage)
+    ☐ get mails
 Archive:
-  ✔ `get_authorization_url` functionality @done(25-03-23 00:24) @project(Todos)
+  ✔ redirect user to home page @started(25-04-08 02:59) @done(25-04-08 02:59) @lasted(21s) @project(Todos)
+  ✔ get_authorization_url functionality @done(25-03-23 00:24) @project(Todos)
