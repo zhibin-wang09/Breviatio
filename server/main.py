@@ -27,8 +27,11 @@ def auth():
 def oauthcallback(state, code):
     exchange_code(state, code)
     # TODO: Store into database
-    return {'success'}
+    return RedirectResponse('/home')
     
+@app.get('home')
+def home():
+    pass
 
 @app.get("/messages/{userId}")
 def getMessagesFrom(userId: str):
