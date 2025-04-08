@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from api import mail
 from fastapi.responses import RedirectResponse
 from api.auth import *
-from starlette.requests import Request
 
 app = FastAPI()
 SCOPES = [
@@ -21,13 +20,12 @@ def read_root():
 @app.get("/authorize")
 def auth():
     url, state = get_authorization_url()
-    STATE_STORAGE['state'] = state  
     return RedirectResponse(url)
     
 
 @app.get('/oauthcallback')
-def oauthcallback(request: Request):
-    credentials = exchange_code(STATE_STORAGE['state'], str(request.url))
+def oauthcallback(state, code):
+    exchange_code(state, code)
     # TODO: Store into database
     return {'success'}
     

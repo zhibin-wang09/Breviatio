@@ -58,8 +58,7 @@ def exchange_code(state, code):
     flow = Flow.from_client_secrets_file(CLIENTSECRETS_LOCATION, SCOPES, state=state)
     flow.redirect_uri = REDIRECT_URI
     try:
-        print("code", code)
-        flow.fetch_token(authorization_response=code)
+        flow.fetch_token(code=code)
         return flow.credentials
     except Exception as error:
         logging.error('An error occurred: %s', error)
