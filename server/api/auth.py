@@ -18,6 +18,12 @@ import json
 #     "token_uri": "https://accounts.google.com/o/oauth2/token"
 #   }
 # }
+
+# Auth logic flow:
+# 1. Prompt the authorization url at google's address
+# 2. Wait for the user to authorize their permissions for the mail app and give us access to login their account
+# 3. Stores user related information in our database for future usage
+# 4. Redirect user back to our endpoint and start the application
 CLIENTSECRETS_LOCATION = './doc/credentials.json'
 REDIRECT_URI = 'http://localhost:8000/oauthcallback'
 SCOPES = [

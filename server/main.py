@@ -19,19 +19,26 @@ def read_root():
 
 @app.get("/authorize")
 def auth():
-    url, state = get_authorization_url()
+    url, _ = get_authorization_url()
     return RedirectResponse(url)
     
 
+# state and code are given by Google's api attached to 
+# the query param of the redirect URL. They are used to
+# further access the Google api
 @app.get('/oauthcallback')
 def oauthcallback(state, code):
-    exchange_code(state, code)
+    credential = exchange_code(state, code)
     # TODO: Store into database
+    user_info = get_user_info(credential)
+    email = user_info['email']
+    
     return RedirectResponse('/home')
     
 @app.get('home')
 def home():
-    pass
+    
+    return {"home"}
 
 @app.get("/messages/{userId}")
 def getMessagesFrom(userId: str):

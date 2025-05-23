@@ -7,7 +7,7 @@ my-app/
 │   ├── app/
 │   │   ├── api/               # All API routes
 │   │   │   ├── auth.py
-│   │   │   ├── users.py
+│   │   │   ├── mail.py
 │   │   │   └── ...
 │   │   ├── core/              # Configs, constants
 │   │   │   ├── config.py
