@@ -3,7 +3,11 @@ from google_auth_oauthlib.flow import Flow, InstalledAppFlow
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
 import os
-import json
+import jwt
+
+from sqlmodel import Session
+from db.models import *
+from db.db import engine
 
 # reference: https://developers.google.com/identity/protocols/oauth2/web-server#python
 # reference: https://developers.google.com/identity/protocols/oauth2/web-server#python_2
@@ -25,6 +29,7 @@ import json
 # 3. Stores user related information in our database for future usage
 # 4. Redirect user back to our endpoint and start the application
 CLIENTSECRETS_LOCATION = './doc/credentials.json'
+JWT_SECRET = os.getenv('JWT_SECRET')
 REDIRECT_URI = 'http://localhost:8000/oauthcallback'
 SCOPES = [
     'openid',
@@ -53,11 +58,27 @@ def get_stored_credentials(user_id):
     # Example: retrieve from a database and use google.auth.credentials.Credentials.from_authorized_user_info(json.loads(stored_json))
     raise NotImplementedError()
 
-def store_credentials(user_id, credentials):
+def store_credentials(user_email, credentials):
     """Store OAuth 2.0 credentials in your application's database."""
     # Implement this function to store the credentials, e.g., store in a database.
     # Example: save credentials.to_json() to the database.
-    raise NotImplementedError()
+    credentials_json = credentials.to_json()
+    user = User_Credential(email=user_email, credentials=credentials_json)
+    
+    # create jwt token
+    encoded_jwt = jwt.encode({"user_email" : user_email, "credentials" : credentials_json}, JWT_SECRET, algorithm='HS256')
+    
+    # store into database
+    
+    with Session(engine) as session:
+        # session is what sends requests to the engine
+        session = Session(engine)
+        # adds user to memory
+        session.add(user)
+        # save the data into the database
+        session.commit()
+    
+    return encoded_jwt
 
 def exchange_code(state, code):
     """Exchange an authorization code for OAuth 2.0 credentials."""

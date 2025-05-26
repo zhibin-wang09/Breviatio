@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from api import mail
 from fastapi.responses import RedirectResponse
-from api.auth import *
+from api import auth as authorize
 
 app = FastAPI()
 SCOPES = [
@@ -19,7 +19,7 @@ def read_root():
 
 @app.get("/authorize")
 def auth():
-    url, _ = get_authorization_url()
+    url, _ = authorize.get_authorization_url()
     return RedirectResponse(url)
     
 
@@ -28,14 +28,17 @@ def auth():
 # further access the Google api
 @app.get('/oauthcallback')
 def oauthcallback(state, code):
-    credential = exchange_code(state, code)
+    credential = authorize.exchange_code(state, code)
     # TODO: Store into database
-    user_info = get_user_info(credential)
+    user_info = authorize.get_user_info(credential)
     email = user_info['email']
     
-    return RedirectResponse('/home')
+    jwt_token = authorize.store_credentials(email, credential)
+    response = RedirectResponse('/home')
+    response.set_cookie(key="access_token", value="jwt_token", httponly=True)
+    return response
     
-@app.get('home')
+@app.get('/home')
 def home():
     
     return {"home"}
