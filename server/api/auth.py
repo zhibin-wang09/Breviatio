@@ -72,10 +72,15 @@ def get_stored_credentials(user_email):
         
     return Credentials.from_authorized_user_info(user_credential)
 
-def is_credentials_valid(credentials: str):
+def is_credentials_valid(credentials: str | Credentials):
+    if isinstance(credentials, Credentials):
+        return credentials.valid
+    return to_credentials_object(credentials).valid;
+
+def to_credentials_object(credentials: str) -> Credentials:
     credentials = json.loads(credentials)
     credentials = Credentials.from_authorized_user_info(credentials)
-    return credentials.valid
+    return credentials
 
 def store_credentials(user_email, credentials):
     """Store OAuth 2.0 credentials in your application's database."""

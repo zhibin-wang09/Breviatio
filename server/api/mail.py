@@ -14,16 +14,15 @@ from googleapiclient.errors import HttpError
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
 
-def getMessages(userId: str):
+def getMessages(user_email: str, credentials):
   """Shows basic usage of the Gmail API.
   Return user messages
   """
-
-  creds = login()
+  
   try:
     # Call the Gmail API
-    service = build("gmail", "v1", credentials=creds)
-    results = service.users().messages().list(userId=userId).execute()
+    service = build("gmail", "v1", credentials=credentials)
+    results = service.users().messages().list(userId=user_email).execute()
     messagesAPI = service.users().messages()
     messages = results.get("messages", [])
     ms = []
@@ -31,38 +30,8 @@ def getMessages(userId: str):
       print("No messages found.")
       return
     for message in messages:
-        m = messagesAPI.get(userId=userId, id=message.get("id")).execute()
+        m = messagesAPI.get(userId=user_email, id=message.get("id")).execute()
         ms.append(m)
     return ms
   except HttpError as error:
-    # TODO(developer) - Handle errors from gmail API.
     print(f"An error occurred: {error}")
-
-
-def login():
-  creds = None
-  # The file token.json stores the user's access and refresh tokens, and is
-  # created automatically when the authorization flow completes for the first
-  # time.
-
-  creds = checkToken()
-  # If there are no (valid) credentials available, let the user log in.
-  if not creds or not creds.valid:
-    if creds and creds.expired and creds.refresh_token:
-      creds.refresh(Request())
-    else:
-      flow = InstalledAppFlow.from_client_secrets_file(
-          "./doc/credentials.json", SCOPES
-      )
-      creds = flow.run_local_server(port=0)
-    # Save the credentials for the next run
-    with open("token.json", "w") as token:
-      token.write(creds.to_json())
-
-
-def checkToken():
-  if os.path.exists("token.json"):
-    creds = Credentials.from_authorized_user_file("token.json", SCOPES)
-    return creds
-  else:
-    return None
