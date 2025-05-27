@@ -1,9 +1,10 @@
 Todos:
-    ☐ set up database
-    ☐ session storage
-    ☐ credential storage 
-    ☐ generate jwt token(to exchange for credential storage)
-    ☐ get mails
+    ✔ set up database @done(25-05-27 15:40)
+    ✔ session storage @done(25-05-27 15:40)
+    ✔ credential storage @done(25-05-27 15:40)
+    ✔ generate jwt token(to exchange for credential storage) @done(25-05-27 15:40)
+    ✔ get mails @started(25-05-27 15:40) @done(25-05-27 15:55) @lasted(15m12s)
+    ☐ parse the emails correctly, and pretty print json
 Archive:
   ✔ redirect user to home page @started(25-04-08 02:59) @done(25-04-08 02:59) @lasted(21s) @project(Todos)
   ✔ get_authorization_url functionality @done(25-03-23 00:24) @project(Todos)
