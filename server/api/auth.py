@@ -2,10 +2,12 @@ import logging
 from google_auth_oauthlib.flow import Flow, InstalledAppFlow
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
 import os
 import jwt
+import json
 
-from sqlmodel import Session
+from sqlmodel import Session, select
 from db.models import *
 from db.db import engine
 
@@ -52,11 +54,28 @@ class NoRefreshTokenException(GetCredentialsException):
 class NoUserIdException(Exception):
     """Error raised when no user ID could be retrieved."""
 
-def get_stored_credentials(user_id):
+def get_stored_credentials(user_email):
     """Retrieve stored credentials for the provided user ID."""
     # Implement this function to retrieve credentials from your storage (e.g., database).
     # Example: retrieve from a database and use google.auth.credentials.Credentials.from_authorized_user_info(json.loads(stored_json))
-    raise NotImplementedError()
+    
+    user_credential = None
+    with Session(engine) as session:
+        # create a sql command to search for a user that matches the user email
+        statement = select(User_Credential).where(User_Credential.email == user_email)
+        
+        # the email is restricted to only one but we use one() here
+        user = session.exec(statement).one()
+        
+        # get the credentials of the user
+        user_credential = user.credentials
+        
+    return Credentials.from_authorized_user_info(user_credential)
+
+def is_credentials_valid(credentials: str):
+    credentials = json.loads(credentials)
+    credentials = Credentials.from_authorized_user_info(credentials)
+    return credentials.valid
 
 def store_credentials(user_email, credentials):
     """Store OAuth 2.0 credentials in your application's database."""
