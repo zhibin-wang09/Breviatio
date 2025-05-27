@@ -2,10 +2,14 @@ from typing import Annotated
 from fastapi import FastAPI, Request, Cookie, Response, Depends, HTTPException, status
 from api import mail
 from fastapi.responses import RedirectResponse, JSONResponse
+from google.oauth2.credentials import Credentials
+
 from api import auth as authorize
+from api import mail
 
 import jwt
 import os
+import json
 
 app = FastAPI()
 SCOPES = [
@@ -31,6 +35,7 @@ async def verify_user(request: Request):
         # decode access_token
         decoded_jwt = jwt.decode(access_token, JWT_SECRET, algorithms=['HS256'])
         credentails = decoded_jwt['credentials']
+        credentails = authorize.to_credentials_object(credentails)
 
         if not authorize.is_credentials_valid(credentails):
             # if credentials is not valid anymore notify the user
@@ -40,7 +45,7 @@ async def verify_user(request: Request):
             )
         
         user_email = decoded_jwt['user_email']
-        credentails = decoded_jwt['credentials']
+        
         return {'user_email': user_email, 'credentials': credentails}
     
 @app.get("/")
@@ -59,7 +64,6 @@ def auth():
 @app.get('/oauthcallback')
 def oauthcallback(state, code):
     credential = authorize.exchange_code(state, code)
-    # TODO: Store into database
     user_info = authorize.get_user_info(credential)
     email = user_info['email']
     
@@ -72,7 +76,9 @@ def oauthcallback(state, code):
 def home(user_info : Annotated[dict,Depends(verify_user)]):
     return JSONResponse(content={"user": user_info['user_email']}, status_code=200)
 
-@app.get("/messages/{userId}")
-def getMessagesFrom(userId: str):
-    messages = mail.getMessages(userId)
-    return {"messages": messages}
+@app.get("/messages")
+def getMessagesFrom(user_info: Annotated[dict, Depends(verify_user)]):
+    user_email = user_info['user_email']
+    credentials = user_info['credentials']
+    mails = mail.getMessages(user_email, credentials)
+    return JSONResponse(content=mails)
