@@ -32,6 +32,7 @@ httpx==0.28.1
 huggingface-hub==0.33.4
 idna==3.10
 Jinja2==3.1.6
+jsonpickle==4.1.1
 keras==3.10.0
 libclang==18.1.1
 Markdown==3.8.2

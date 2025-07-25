@@ -11,12 +11,6 @@ import os
 import json
 
 app = FastAPI()
-SCOPES = [
-    'openid',
-    'https://www.googleapis.com/auth/gmail.readonly',
-    'https://www.googleapis.com/auth/userinfo.email',
-    'https://www.googleapis.com/auth/userinfo.profile'
-]
 
 JWT_SECRET = os.getenv('JWT_SECRET')
 
@@ -73,11 +67,8 @@ def oauthcallback(state, code):
     
 @app.get('/home')
 def home(user_info : Annotated[dict,Depends(verify_user)]):
-    return JSONResponse(content={"user": user_info['user_email']}, status_code=200)
-
-@app.get("/messages")
-def getMessagesFrom(user_info: Annotated[dict, Depends(verify_user)]):
     user_email = user_info['user_email']
     credentials = user_info['credentials']
     mails = mail_api.getMessages(user_email, credentials)
-    return JSONResponse(content=mails)
+    return JSONResponse(content=mails, status_code=200)
+
