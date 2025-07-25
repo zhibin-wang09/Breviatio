@@ -1,1 +1,4 @@
-server/__pycache__
+**/__pycache__
+server/doc/credentials.json
+**/token.json
+.env

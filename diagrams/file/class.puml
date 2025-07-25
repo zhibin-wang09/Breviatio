@@ -1,0 +1,35 @@
+@startuml class
+class Email{
+    +String source
+    +String to
+    +String subject
+    +String body
+    +Label Label
+}
+
+class User{
+    +String email_addr
+    +Email[] emails
+    +Credential strs
+}
+
+class Model{
+    -Label[] labels
+    -Model model
+    +batch_infer()  
+    +infer()
+}
+
+enum Label{
+    Applied
+    Screening
+    Assessment
+    InitialCall
+    Interview
+    Offer
+}
+
+
+Email --o User 
+
+@enduml
