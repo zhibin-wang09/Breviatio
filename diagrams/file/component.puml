@@ -1,0 +1,24 @@
+@startuml component
+left to right direction
+
+[model]
+
+
+package "<<subsystem>> "{
+    [app]
+}
+
+database {
+    interface "TCP/IP" as dba
+    dba -- [PostgreSQL]
+} 
+
+cloud {
+    () "HTTP" -- [OAuth Server]
+}
+
+[app] --> HTTP
+[app] -right-( interface
+dba -left- interface
+[app] --> model
+@enduml

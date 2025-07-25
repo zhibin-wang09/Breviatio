@@ -1,0 +1,14 @@
+@startuml usecase
+skinparam actorStyle awesome
+left to right direction
+
+actor User as "User"
+
+package Brevatio{
+    usecase ListEmail as "List Job Email Labels"
+
+}
+
+User ---> ListEmail
+
+@enduml
