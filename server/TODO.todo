@@ -1,10 +1,20 @@
 Todos:
-    ✔ set up database @done(25-05-27 15:40)
-    ✔ session storage @done(25-05-27 15:40)
-    ✔ credential storage @done(25-05-27 15:40)
-    ✔ generate jwt token(to exchange for credential storage) @done(25-05-27 15:40)
-    ✔ get mails @started(25-05-27 15:40) @done(25-05-27 15:55) @lasted(15m12s)
-    ☐ parse the emails correctly, and pretty print json
+    Database:
+      ✔ set up database @done(25-05-27 15:40)
+      ✔ design databsae models @high @done(25-07-24 22:28)
+      ✔ store logged in user in database @done(25-07-24 22:28)
+      ☐ access logged in user info from database 
+
+    Model:
+      ✔ import hugging face pre-trained model @done(25-07-24 18:02)
+      ☐ apply inference on emails marking whether it's job app or not type email @high
+      ☐ implement langchain for email category detection -> job application stage detection
+
+    MailAPI:
+      ☐ parse the emails into our model @high
+      ☐ pub/sub for email
+      ✔ get mails @started(25-05-27 15:40) @done(25-05-27 15:55) @lasted(15m12s)
+      ✔ generate jwt token(to exchange for credential storage) @done(25-05-27 15:40)
 Archive:
   ✔ redirect user to home page @started(25-04-08 02:59) @done(25-04-08 02:59) @lasted(21s) @project(Todos)
   ✔ get_authorization_url functionality @done(25-03-23 00:24) @project(Todos)
