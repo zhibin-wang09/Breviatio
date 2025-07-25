@@ -3,53 +3,15 @@
 ## Get Started
 1. Create a virtual environment or Conda environment
 2. Pip install requirement.txt
+3. Set up environment variables
+4. Download `credentials.json` from Google Cloud Console
 3. Navigate to project root directory
 4. `fastapi run server/main.py`
 
-ure
+## ENV variables
 ```
-my-app/
-├── backend/
-│   ├── app/
-│   │   ├── api/               # All API routes
-│   │   │   ├── auth.py
-│   │   │   ├── mail.py
-│   │   │   └── ...
-│   │   ├── core/              # Configs, constants
-│   │   │   ├── config.py
-│   │   │   └── security.py
-│   │   ├── models/            # DB models (SQLAlchemy, Pydantic, etc.)
-│   │   │   ├── user.py
-│   │   │   └── ...
-│   │   ├── services/          # Business logic, integrations (e.g., Google API)
-│   │   │   ├── google_oauth.py
-│   │   │   └── user_service.py
-│   │   ├── db/                # DB connection, session, CRUD utils
-│   │   │   ├── session.py
-│   │   │   └── user_crud.py
-│   │   ├── schemas/           # Pydantic schemas for request/response models
-│   │   │   ├── user.py
-│   │   │   └── ...
-│   │   ├── main.py            # Entry point (FastAPI/Flask app)
-│   │   └── dependencies.py    # Common dependencies (e.g. get_current_user)
-│
-│   ├── requirements.txt
-│   └── .env                   # Secrets, env vars
-│
-├── frontend/                  # React, Vue, etc.
-│   ├── public/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── services/          # API calls (fetch/axios)
-│   │   ├── App.js
-│   │   └── ...
-│   ├── package.json
-│   └── vite.config.js / next.config.js / ...
-│
-├── docker-compose.yml         # For local dev env
-├── README.md
-└── .gitignore
+export DB_CONNECTION_STRING=
+export JWT_SECRET=
 ```
 
 ## Architecture Design
