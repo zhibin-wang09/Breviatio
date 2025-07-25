@@ -15,7 +15,7 @@ SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
 
 def getMessages(user_email: str, credentials):
-  """Shows basic usage of the Gmail API.
+  """
   Return user messages
   """
   

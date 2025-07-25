@@ -8,8 +8,8 @@ import jwt
 import json
 
 from sqlmodel import Session, select
-from db.models import *
-from db.db import engine
+from server.models.user import *
+from server.db.db import engine
 
 # reference: https://developers.google.com/identity/protocols/oauth2/web-server#python
 # reference: https://developers.google.com/identity/protocols/oauth2/web-server#python_2
@@ -30,7 +30,7 @@ from db.db import engine
 # 2. Wait for the user to authorize their permissions for the mail app and give us access to login their account
 # 3. Stores user related information in our database for future usage
 # 4. Redirect user back to our endpoint and start the application
-CLIENTSECRETS_LOCATION = './doc/credentials.json'
+CLIENTSECRETS_LOCATION = 'server/doc/credentials.json'
 JWT_SECRET = os.getenv('JWT_SECRET')
 REDIRECT_URI = 'http://localhost:8000/oauthcallback'
 SCOPES = [
@@ -62,13 +62,13 @@ def get_stored_credentials(user_email):
     user_credential = None
     with Session(engine) as session:
         # create a sql command to search for a user that matches the user email
-        statement = select(User_Credential).where(User_Credential.email == user_email)
+        statement = select(User).where(User.email_addr == user_email)
         
         # the email is restricted to only one but we use one() here
         user = session.exec(statement).one()
         
         # get the credentials of the user
-        user_credential = user.credentials
+        user_credential = user.credential
         
     return Credentials.from_authorized_user_info(user_credential)
 
@@ -87,7 +87,7 @@ def store_credentials(user_email, credentials):
     # Implement this function to store the credentials, e.g., store in a database.
     # Example: save credentials.to_json() to the database.
     credentials_json = credentials.to_json()
-    user = User_Credential(email=user_email, credentials=credentials_json)
+    user = User(email_addr=user_email, credential=credentials_json)
     
     # create jwt token
     encoded_jwt = jwt.encode({"user_email" : user_email, "credentials" : credentials_json}, JWT_SECRET, algorithm='HS256')
