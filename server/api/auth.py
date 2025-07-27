@@ -95,12 +95,13 @@ def store_credentials(user_email, credentials):
     # store into database
     
     with Session(engine) as session:
-        # session is what sends requests to the engine
-        session = Session(engine)
-        # adds user to memory
-        session.add(user)
-        # save the data into the database
-        session.commit()
+        statement = select(User).where(User.email_addr == user.email_addr)
+        results = session.exec(statement).first()
+        if results is None:
+            # adds user to memory
+            session.add(user)
+            # save the data into the database
+            session.commit()
     
     return encoded_jwt
 
