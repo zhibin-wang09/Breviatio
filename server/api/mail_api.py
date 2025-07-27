@@ -1,11 +1,5 @@
 # this file contains the code for accessing the gmail api
 
-import json
-import os.path
-
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import base64
@@ -47,13 +41,21 @@ def getMessages(user_email: str, credentials) -> list[Email]:
         payload = m['payload']
         email = parseMessages(payload)
         email.snippet = snippet
-        emails.append(jsonpickle.dumps(email))
+        emails.append(email)
     return emails
   except HttpError as error:
     print(f"An error occurred: {error}")
     
   
 def parseMessages(messagePart):
+  """messagePart is recursive structure hence we need to process the parts field recursively
+
+  Args:
+      messagePart (_type_): the payload of a email message
+
+  Returns:
+      A single email without the snippet because we are only parsing parts
+  """
   mimeType = messagePart['mimeType']
   subject = ''
   source = ''

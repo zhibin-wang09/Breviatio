@@ -1,6 +1,7 @@
 from typing import Annotated
 from fastapi import FastAPI, Request, Cookie, Response, Depends, HTTPException, status
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.responses import RedirectResponse, JSONResponse, PlainTextResponse
+from fastapi.encoders import jsonable_encoder
 from google.oauth2.credentials import Credentials
 
 from server.api import auth as authorize
@@ -70,5 +71,6 @@ def home(user_info : Annotated[dict,Depends(verify_user)]):
     user_email = user_info['user_email']
     credentials = user_info['credentials']
     mails = mail_api.getMessages(user_email, credentials)
-    return JSONResponse(content=mails, status_code=200)
+    json_compatible_data = jsonable_encoder(mails)
+    return JSONResponse(content=json_compatible_data)
 

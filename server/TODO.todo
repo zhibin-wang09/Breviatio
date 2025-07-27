@@ -14,7 +14,7 @@ Todos:
 
     MailAPI:
       ✔ parse the emails into our Email Object @high @done(25-07-25 16:47)
-      ☐ check for all mimetypes in emails to make sure they can be parsed
+      ✔ check for all mimetypes in emails to make sure they can be parsed @done(25-07-27 12:31)
       ☐ pub/sub for email
       ✔ get mails @started(25-05-27 15:40) @done(25-05-27 15:55) @lasted(15m12s)
       ✔ generate jwt token(to exchange for credential storage) @done(25-05-27 15:40)
