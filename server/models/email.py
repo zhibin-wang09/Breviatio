@@ -1,9 +1,6 @@
 from typing import Optional
-from sqlmodel import Field, SQLModel
-import json
-
 class Email():
-    def __init__(self, date: str, mimeType: str, source: str, to: str, subject: str, snippet: str, body: list[str]):
+    def __init__(self, date: str, mimeType: str, source: str, to: str, subject: str, body: list, snippet=''):
         self.mimeType = mimeType
         self.source = source
         self.to = to
