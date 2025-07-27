@@ -3,8 +3,6 @@
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import base64
-import jsonpickle
-
 from server.models.email import Email
 
 
@@ -12,8 +10,6 @@ def getMessages(user_email: str, credentials) -> list[Email]:
   """
   Return user messages
   """
-  
-  
   # gmail messages is of type users.message
   # this object have payload of type users.messageparts
   # users.messageparts have a field called mimeType this tells us what type of

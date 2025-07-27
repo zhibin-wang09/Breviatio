@@ -1,15 +1,15 @@
 from typing import Annotated
-from fastapi import FastAPI, Request, Cookie, Response, Depends, HTTPException, status
-from fastapi.responses import RedirectResponse, JSONResponse, PlainTextResponse
+from fastapi import FastAPI, Request, Depends, HTTPException, status
+from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.encoders import jsonable_encoder
-from google.oauth2.credentials import Credentials
+import jsonpickle
 
 from server.api import auth as authorize
 from server.api import mail_api
+from server.db.redis import rd
 
 import jwt
 import os
-import json
 
 app = FastAPI()
 
@@ -70,7 +70,12 @@ def oauthcallback(state, code):
 def home(user_info : Annotated[dict,Depends(verify_user)]):
     user_email = user_info['user_email']
     credentials = user_info['credentials']
-    mails = mail_api.getMessages(user_email, credentials)
+    mails = rd.get(user_email)
+    if mails is None:
+        mails = mail_api.getMessages(user_email, credentials)
+        rd.set(user_email, jsonpickle.dumps(mails));
+    else:
+        mails = jsonpickle.loads(mails)
     json_compatible_data = jsonable_encoder(mails)
     return JSONResponse(content=json_compatible_data)
 
