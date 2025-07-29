@@ -1,10 +1,10 @@
 import logging
+from typing import Union
 from google_auth_oauthlib.flow import Flow, InstalledAppFlow
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 import os
-import jwt
 import json
 
 from sqlmodel import Session, select
@@ -66,7 +66,7 @@ def get_stored_credentials(session_id) -> User:
     # Implement this function to retrieve credentials from your storage (e.g., database).
     # Example: retrieve from a database and use google.auth.credentials.Credentials.from_authorized_user_info(json.loads(stored_json))
 
-    user : User = None
+    user: User = None
     with Session(engine) as session:
         # create a sql command to search for a user that matches the user email
         statement = select(User).where(User.id == session_id)
@@ -82,6 +82,7 @@ def to_credentials_object(credentials: str) -> Credentials:
     credentials = Credentials.from_authorized_user_info(credentials)
     return credentials
 
+
 def store_credentials(user_email, credentials: Credentials):
     """
     Store OAuth 2.0 credentials in your application's database.
@@ -90,8 +91,8 @@ def store_credentials(user_email, credentials: Credentials):
     # Example: save credentials.to_json() to the database.
     # credentials_json = credentials.to_json()
     credentials_json = credentials.to_json()
-    session_id : uuid.UUID
-    new_user = User(email_addr=user_email, credential=credentials_json)    
+    session_id: uuid.UUID
+    new_user = User(email_addr=user_email, credential=credentials_json)
     with Session(engine) as session:
         statement = select(User).where(User.email_addr == new_user.email_addr)
         user = session.exec(statement).first()
@@ -102,10 +103,8 @@ def store_credentials(user_email, credentials: Credentials):
             # update
             user.credential = credentials_json
             session.add(user)
-        
+        session_id = user.id
         session.commit()
-        session_id = user.id;
-        
     return session_id
 
 def exchange_code(state, code):
