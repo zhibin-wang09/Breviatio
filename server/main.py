@@ -4,13 +4,15 @@ from fastapi import FastAPI, Request, Depends, HTTPException, status
 from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.encoders import jsonable_encoder
 import jsonpickle
+from datetime import datetime, timezone, timedelta
 
 from server.api import auth as authorize
 from server.api import mail_api
 from server.db.redis import rd
 
-import jwt
 import os
+
+from server.models.user import User
 
 app = FastAPI()
 
@@ -18,31 +20,27 @@ JWT_SECRET = os.getenv("JWT_SECRET")
 
 
 async def verify_user(request: Request):
-    access_token = request.cookies.get("access_token")
-    if not access_token:
+    session_id = request.cookies.get("session_id")
+    if not session_id:
         # 401 means the user is not authenticated
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
+            detail="Invalid Authentication Credentials",
         )
     else:
-        access_token = request.cookies["access_token"]
-
         # decode access_token
-        decoded_jwt = jwt.decode(access_token, JWT_SECRET, algorithms=["HS256"])
-        token = decoded_jwt["credentials"]
-        token = Credentials(token = token)
 
-        if not authorize.is_credentials_valid(token):
+        user = authorize.get_stored_credentials(session_id)
+        credentials = authorize.to_credentials_object(user.credential)
+
+        if not credentials.valid:
             # if credentials is not valid anymore notify the user
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid authentication credentials",
             )
 
-        user_email = decoded_jwt["user_email"]
-
-        return {"user_email": user_email, "credentials": token}
+        return user
 
 
 @app.get("/")
@@ -65,21 +63,24 @@ def oauthcallback(state, code):
     user_info = authorize.get_user_info(credential)
     email = user_info["email"]
 
-    jwt_token = authorize.store_credentials(email, credential)
+    session_id = authorize.store_credentials(email, credential)
+    expiry_date = datetime.now(timezone.utc) + timedelta(days=3)
     response = RedirectResponse("/home")
-    response.set_cookie(key="access_token", value=jwt_token, httponly=True)
+    response.set_cookie(
+        key="session_id", value=session_id, httponly=True, expires=expiry_date
+    )
     return response
 
 
 @app.get("/home")
-def home(user_info: Annotated[dict, Depends(verify_user)]):
-    user_email = user_info["user_email"]
-    credentials = user_info["credentials"]
+def home(user: Annotated[User, Depends(verify_user)]):
     # mails = rd.get(user_email)
-    mails = None;
+    mails = None
+    credentials = authorize.to_credentials_object(user.credential)
+    
     if mails is None:
-        mails = mail_api.getMessages(user_email, credentials)
-        rd.set(user_email, jsonpickle.dumps(mails))
+        mails = mail_api.getMessages(user.email_addr, credentials)
+        # rd.set(user_email, jsonpickle.dumps(mails))
     else:
         mails = jsonpickle.loads(mails)
     json_compatible_data = jsonable_encoder(mails)
