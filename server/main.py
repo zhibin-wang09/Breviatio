@@ -1,4 +1,5 @@
 from typing import Annotated
+from google.oauth2.credentials import Credentials
 from fastapi import FastAPI, Request, Depends, HTTPException, status
 from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -29,10 +30,10 @@ async def verify_user(request: Request):
 
         # decode access_token
         decoded_jwt = jwt.decode(access_token, JWT_SECRET, algorithms=["HS256"])
-        credentails = decoded_jwt["credentials"]
-        credentails = authorize.to_credentials_object(credentails)
+        token = decoded_jwt["credentials"]
+        token = Credentials(token = token)
 
-        if not authorize.is_credentials_valid(credentails):
+        if not authorize.is_credentials_valid(token):
             # if credentials is not valid anymore notify the user
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -41,7 +42,7 @@ async def verify_user(request: Request):
 
         user_email = decoded_jwt["user_email"]
 
-        return {"user_email": user_email, "credentials": credentails}
+        return {"user_email": user_email, "credentials": token}
 
 
 @app.get("/")
@@ -74,7 +75,8 @@ def oauthcallback(state, code):
 def home(user_info: Annotated[dict, Depends(verify_user)]):
     user_email = user_info["user_email"]
     credentials = user_info["credentials"]
-    mails = rd.get(user_email)
+    # mails = rd.get(user_email)
+    mails = None;
     if mails is None:
         mails = mail_api.getMessages(user_email, credentials)
         rd.set(user_email, jsonpickle.dumps(mails))

@@ -6,8 +6,8 @@ from google.oauth2.credentials import Credentials
 import os
 import jwt
 import json
-import datetime
-from pytz import timezone
+from datetime import datetime, timedelta
+import pytz
 
 from sqlmodel import Session, select
 from server.models.user import *
@@ -96,14 +96,14 @@ def store_credentials(user_email, credentials: Credentials):
     """Store OAuth 2.0 credentials in your application's database."""
     # Implement this function to store the credentials, e.g., store in a database.
     # Example: save credentials.to_json() to the database.
-    credentials_json = credentials.to_json()
+    # credentials_json = credentials.to_json()
 
     # create jwt token
     encoded_jwt = jwt.encode(
         {
             "user_email": user_email,
-            "credentials": credentials_json,
-            "exp": datetime.now(tz=timezone.est) + datetime.timedelta(days=5),
+            "credentials": credentials.token,
+            "exp": datetime.now(tz=pytz.utc) + timedelta(days=5),
         },
         JWT_SECRET,
         algorithm="HS256",
