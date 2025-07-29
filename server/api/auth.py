@@ -107,6 +107,18 @@ def store_credentials(user_email, credentials: Credentials):
         session.commit()
     return session_id
 
+
+def remove_credentials(session_id: uuid.UUID) -> bool:
+    with Session(engine) as session:
+        statement = select(User).where(User.id == session_id)
+        user = session.exec(statement).first()
+        if user is None:
+            # adds user to memory
+            return False
+        else:
+            session.delete(user)
+    return True
+
 def exchange_code(state, code):
     """Exchange an authorization code for OAuth 2.0 credentials."""
     flow = Flow.from_client_secrets_file(CLIENTSECRETS_LOCATION, SCOPES, state=state)

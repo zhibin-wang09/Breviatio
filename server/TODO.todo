@@ -3,7 +3,8 @@ Todos:
       ✔ set up database @done(25-05-27 15:40)
       ✔ design databsae models @high @done(25-07-24 22:28)
       ✔ store logged in user in database @done(25-07-24 22:28)
-      ☐ access logged in user info from database 
+      ✔ access logged in user info from database @done(25-07-29 16:00)
+      ☐ invalidate session when user logs out
       ✔ if the user already exist in the database don't add them @done(25-07-27 18:22)
       ✔ implement in-memory database for emails for less request to Google API and faster retrieval @done(25-07-27 18:21)
 

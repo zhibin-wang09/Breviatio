@@ -42,12 +42,6 @@ async def verify_user(request: Request):
 
         return user
 
-
-@app.get("/")
-def read_root():
-    return {"hello": "world"}
-
-
 @app.get("/authorize")
 def auth():
     url, _ = authorize.get_authorization_url()
@@ -65,19 +59,24 @@ def oauthcallback(state, code):
 
     session_id = authorize.store_credentials(email, credential)
     expiry_date = datetime.now(timezone.utc) + timedelta(days=3)
-    response = RedirectResponse("/home")
+    response = RedirectResponse("/mail")
     response.set_cookie(
         key="session_id", value=session_id, httponly=True, expires=expiry_date
     )
     return response
 
 
-@app.get("/home")
+@app.get("/mail/out")
+def logOut(user: Annotated[User, Depends(verify_user)]):
+    authorize.remove_credentials(user.id)
+    return JSONResponse(status_code=200)
+
+@app.get("/mail")
 def home(user: Annotated[User, Depends(verify_user)]):
     # mails = rd.get(user_email)
     mails = None
     credentials = authorize.to_credentials_object(user.credential)
-    
+
     if mails is None:
         mails = mail_api.getMessages(user.email_addr, credentials)
         # rd.set(user_email, jsonpickle.dumps(mails))
