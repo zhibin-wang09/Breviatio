@@ -1,17 +1,16 @@
 import logging
+from typing import Union
 from google_auth_oauthlib.flow import Flow, InstalledAppFlow
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 import os
-import jwt
 import json
-import datetime
-from pytz import timezone
 
 from sqlmodel import Session, select
 from server.models.user import *
 from server.db.db import engine
+from server.db.redis import rd
 
 # reference: https://developers.google.com/identity/protocols/oauth2/web-server#python
 # reference: https://developers.google.com/identity/protocols/oauth2/web-server#python_2
@@ -62,29 +61,20 @@ class NoUserIdException(Exception):
     """Error raised when no user ID could be retrieved."""
 
 
-def get_stored_credentials(user_email):
+def get_stored_credentials(session_id) -> User:
     """Retrieve stored credentials for the provided user ID."""
     # Implement this function to retrieve credentials from your storage (e.g., database).
     # Example: retrieve from a database and use google.auth.credentials.Credentials.from_authorized_user_info(json.loads(stored_json))
 
-    user_credential = None
+    user: User = None
     with Session(engine) as session:
         # create a sql command to search for a user that matches the user email
-        statement = select(User).where(User.email_addr == user_email)
+        statement = select(User).where(User.id == session_id)
 
         # the email is restricted to only one but we use one() here
         user = session.exec(statement).one()
 
-        # get the credentials of the user
-        user_credential = user.credential
-
-    return Credentials.from_authorized_user_info(user_credential)
-
-
-def is_credentials_valid(credentials: str | Credentials):
-    if isinstance(credentials, Credentials):
-        return credentials.valid
-    return to_credentials_object(credentials).valid
+    return user
 
 
 def to_credentials_object(credentials: str) -> Credentials:
@@ -92,25 +82,30 @@ def to_credentials_object(credentials: str) -> Credentials:
     credentials = Credentials.from_authorized_user_info(credentials)
     return credentials
 
+
 def store_credentials(user_email, credentials: Credentials):
-    """Store OAuth 2.0 credentials in your application's database."""
+    """
+    Store OAuth 2.0 credentials in your application's database.
+    """
     # Implement this function to store the credentials, e.g., store in a database.
     # Example: save credentials.to_json() to the database.
+    # credentials_json = credentials.to_json()
     credentials_json = credentials.to_json()
-
-    # create jwt token
-    encoded_jwt = jwt.encode(
-        {
-            "user_email": user_email,
-            "credentials": credentials_json,
-            "exp": datetime.now(tz=timezone.est) + datetime.timedelta(days=5),
-        },
-        JWT_SECRET,
-        algorithm="HS256",
-    )
-
-    return encoded_jwt
-
+    session_id: uuid.UUID
+    new_user = User(email_addr=user_email, credential=credentials_json)
+    with Session(engine) as session:
+        statement = select(User).where(User.email_addr == new_user.email_addr)
+        user = session.exec(statement).first()
+        if user is None:
+            # adds user to memory
+            session.add(new_user)
+        else:
+            # update
+            user.credential = credentials_json
+            session.add(user)
+        session_id = user.id
+        session.commit()
+    return session_id
 
 def exchange_code(state, code):
     """Exchange an authorization code for OAuth 2.0 credentials."""

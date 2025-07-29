@@ -2,11 +2,12 @@
 
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from google.oauth2.credentials import Credentials
 import base64
 from server.models.email import Email
 
 
-def getMessages(user_email: str, credentials) -> list[Email]:
+def getMessages(user_email: str, credentials: Credentials) -> list[Email]:
     """
     Return user messages
     """
