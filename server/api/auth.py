@@ -92,12 +92,11 @@ def to_credentials_object(credentials: str) -> Credentials:
     credentials = Credentials.from_authorized_user_info(credentials)
     return credentials
 
-def store_credentials(user_email, credentials):
+def store_credentials(user_email, credentials: Credentials):
     """Store OAuth 2.0 credentials in your application's database."""
     # Implement this function to store the credentials, e.g., store in a database.
     # Example: save credentials.to_json() to the database.
     credentials_json = credentials.to_json()
-    user = User(email_addr=user_email, credential=credentials_json)
 
     # create jwt token
     encoded_jwt = jwt.encode(
@@ -109,16 +108,6 @@ def store_credentials(user_email, credentials):
         JWT_SECRET,
         algorithm="HS256",
     )
-
-    # store into database
-    with Session(engine) as session:
-        statement = select(User).where(User.email_addr == user.email_addr)
-        results = session.exec(statement).first()
-        if results is None:
-            # adds user to memory
-            session.add(user)
-            # save the data into the database
-            session.commit()
 
     return encoded_jwt
 
