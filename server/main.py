@@ -66,7 +66,7 @@ def oauthcallback(state, code):
     return response
 
 
-@app.get("/mail/out")
+@app.get("/mail/logout")
 def logOut(user: Annotated[User, Depends(verify_user)]):
     authorize.remove_credentials(user.id)
     return JSONResponse(status_code=200)

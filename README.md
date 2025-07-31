@@ -11,8 +11,12 @@
 ## ENV variables
 ```
 export DB_CONNECTION_STRING=
-export JWT_SECRET=
 ```
+Store `.env` file at folder root and run `source .env`
+
+## System Components
+1. Set up Redis using docker [redis-py guideline](https://github.com/redis/redis-py)
+2. Set up PostgreSQL with database name `Brevatio`
 
 ## Architecture Design
 
