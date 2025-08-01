@@ -5,9 +5,14 @@ from googleapiclient.errors import HttpError
 from google.oauth2.credentials import Credentials
 import base64
 from server.models.email import Email
+from server.models.model import email_classification_model
+import jsonpickle
+from bs4 import BeautifulSoup
+import re
 
 
-def getMessages(user_email: str, credentials: Credentials) -> list[Email]:
+
+def get_messages(user_email: str, credentials: Credentials) -> list[Email]:
     """
     Return user messages
     """
@@ -25,7 +30,9 @@ def getMessages(user_email: str, credentials: Credentials) -> list[Email]:
     try:
         # Call the Gmail API
         service = build("gmail", "v1", credentials=credentials)
-        results = service.users().messages().list(userId=user_email).execute()
+        results = (
+            service.users().messages().list(userId=user_email, maxResults=5).execute()
+        )
         messagesAPI = service.users().messages()
         messages = results.get("messages", [])
         emails = []
@@ -36,15 +43,16 @@ def getMessages(user_email: str, credentials: Credentials) -> list[Email]:
             m = messagesAPI.get(userId=user_email, id=message.get("id")).execute()
             snippet = m["snippet"]
             payload = m["payload"]
-            email = parseMessages(payload)
+            email = parse_messages(payload)
             email.snippet = snippet
-            emails.append(email)
+            email_type = email_classification_model.infer(get_mail_plain_text(email))
+            emails.append({"type": email_type, "email": get_mail_plain_text(email)})
         return emails
     except HttpError as error:
         print(f"An error occurred: {error}")
 
 
-def parseMessages(messagePart):
+def parse_messages(messagePart):
     """messagePart is recursive structure hence we need to process the parts field recursively
 
     Args:
@@ -78,7 +86,7 @@ def parseMessages(messagePart):
         # field body may be empty
         parts = messagePart["parts"]
         for p in parts:
-            body.append(parseMessages(p))  # recursively add the payloads
+            body.append(parse_messages(p))  # recursively add the payloads
     else:
         # non-container MIME message part type
         # uses body
@@ -91,3 +99,25 @@ def parseMessages(messagePart):
         date=date, mimeType=mimeType, source=source, to=to, subject=subject, body=body
     )
     return email
+
+def get_mail_plain_text(email):
+        
+    text = ''
+    text += 'Subject: ' + email.subject + '\n'
+    text += 'Snipet: ' + email.snippet + '\n'
+    text += 'From: ' + email.source + '\n'
+    text += 'To: ' + email.to + '\n'
+    body = ''
+    if email.mimeType == 'text/html':
+        soup = BeautifulSoup(email.body[0], 'html.parser')
+        body = soup.get_text(separator=" ")
+        re.sub(r'http[s]?://\S+', '', body)
+    elif email.mimeType == 'text/plain':
+        body = re.sub(r'http[s]?://\S+', '', email.body[0])
+    else:
+        for b in email.body:
+            body = get_mail_plain_text(b)
+    
+    text += body + '\n'
+    return text
+                    
