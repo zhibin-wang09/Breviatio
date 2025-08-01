@@ -7,7 +7,7 @@ import jsonpickle
 from datetime import datetime, timezone, timedelta
 
 from server.api import auth as authorize
-from server.api import mail_api
+from server.api import mail
 from server.db.redis import rd
 
 import os
@@ -78,7 +78,7 @@ def home(user: Annotated[User, Depends(verify_user)]):
     credentials = authorize.to_credentials_object(user.credential)
 
     if mails is None:
-        mails = mail_api.getMessages(user.email_addr, credentials)
+        mails = mail.get_messages(user.email_addr, credentials)
         # rd.set(user_email, jsonpickle.dumps(mails))
     else:
         mails = jsonpickle.loads(mails)
