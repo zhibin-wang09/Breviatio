@@ -99,11 +99,12 @@ def store_credentials(user_email, credentials: Credentials):
         if user is None:
             # adds user to memory
             session.add(new_user)
+            session_id = new_user.id
         else:
             # update
             user.credential = credentials_json
             session.add(user)
-        session_id = user.id
+            session_id = user.id
         session.commit()
     return session_id
 
