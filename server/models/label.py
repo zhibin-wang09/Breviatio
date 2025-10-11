@@ -1,9 +1,9 @@
 from enum import Enum
 
-class Label(Enum):
-    Applied = 'Applied'
-    Screening = 'Screening'
-    Assessment = 'Assessment'
-    InitialCall = 'InitialCall'
-    Interview = 'Interview'
-    Offer = 'Offer'
+class EmailCategory(Enum):
+    SCHEDULING = "Scheduling"
+    QUESTION = "Question"
+    MARKETING = "Marketing"
+    JOB = "Job"
+    REQUEST = "Request"
+    CLASSES = "Classes"
