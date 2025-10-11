@@ -1,17 +1,25 @@
 absl-py==2.3.1
+aiohappyeyeballs==2.6.1
+aiohttp==3.13.0
+aiosignal==1.4.0
 annotated-types==0.7.0
 anyio==4.8.0
 astunparse==1.6.3
+attrs==25.4.0
+beautifulsoup4==4.13.4
 cachetools==5.5.2
 certifi==2025.1.31
 charset-normalizer==3.4.1
 click==8.1.8
+datasets==4.2.0
+dill==0.4.0
 dnspython==2.7.0
 email_validator==2.2.0
 fastapi==0.115.11
 fastapi-cli==0.0.7
 filelock==3.18.0
 flatbuffers==25.2.10
+frozenlist==1.8.0
 fsspec==2025.7.0
 gast==0.6.0
 google-api-core==2.24.2
@@ -41,6 +49,8 @@ MarkupSafe==3.0.2
 mdurl==0.1.2
 ml_dtypes==0.5.1
 mpmath==1.3.0
+multidict==6.7.0
+multiprocess==0.70.16
 namex==0.1.0
 networkx==3.5
 numpy==2.1.3
@@ -48,9 +58,12 @@ oauthlib==3.2.2
 opt_einsum==3.4.0
 optree==0.16.0
 packaging==25.0
+pandas==2.3.3
+propcache==0.4.1
 proto-plus==1.26.1
 protobuf==5.29.3
 psycopg2-binary==2.9.10
+pyarrow==21.0.0
 pyasn1==0.6.1
 pyasn1_modules==0.4.1
 pydantic==2.10.6
@@ -58,6 +71,7 @@ pydantic_core==2.27.2
 Pygments==2.19.1
 PyJWT==2.10.1
 pyparsing==3.2.1
+python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 python-multipart==0.0.20
 pytz==2025.2
@@ -74,6 +88,7 @@ setuptools==78.1.1
 shellingham==1.5.4
 six==1.17.0
 sniffio==1.3.1
+soupsieve==2.7
 SQLAlchemy==2.0.40
 sqlmodel==0.0.24
 starlette==0.46.1
@@ -89,6 +104,7 @@ tqdm==4.67.1
 transformers==4.53.2
 typer==0.15.2
 typing_extensions==4.12.2
+tzdata==2025.2
 uritemplate==4.1.1
 urllib3==2.3.0
 uvicorn==0.34.0
@@ -98,3 +114,5 @@ websockets==15.0.1
 Werkzeug==3.1.3
 wheel==0.45.1
 wrapt==1.17.2
+xxhash==3.6.0
+yarl==1.22.0

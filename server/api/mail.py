@@ -5,7 +5,7 @@ from googleapiclient.errors import HttpError
 from google.oauth2.credentials import Credentials
 import base64
 from server.models.email import Email
-from server.models.model import email_summarization_model
+from server.models.model import email_categorize
 import jsonpickle
 from bs4 import BeautifulSoup
 import re
@@ -45,8 +45,9 @@ def get_messages(user_email: str, credentials: Credentials) -> list[Email]:
             payload = m["payload"]
             email = parse_messages(payload)
             email.snippet = snippet
-            email_summarization = email_summarization_model.infer(get_mail_plain_text(email))
-            emails.append({"summarization": email_summarization, "email": get_mail_plain_text(email)})
+            plain_text_email = get_mail_plain_text(email)
+            category = email_categorize.infer(plain_text_email)
+            emails.append({"category": category, "email": plain_text_email})
         return emails
     except HttpError as error:
         print(f"An error occurred: {error}")

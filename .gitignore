@@ -2,3 +2,4 @@
 server/doc/credentials.json
 **/token.json
 .env
+dataset.txt
