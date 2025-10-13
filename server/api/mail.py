@@ -43,20 +43,16 @@ def get_messages(user_email: str, credentials: Credentials) -> list[Email]:
             return
         
         for message in messages:
-            m = messagesAPI.get(userId=user_email, id=message.get("id")).execute()
-            snippet = m["snippet"]
-            payload = m["payload"]
+            email_json = messagesAPI.get(userId=user_email, id=message.get("id")).execute()
+
             # set up email object
-            email : Email = extract_email_global_information(payload)
-            body = parse_messages(email.mimeType, payload)
-            email.body = body
-            email.snippet = snippet
+            email : Email = parse_email(email_json)
             
             # email now contains all of its payloads
             # we want to only use the simplest form for classification because it reduces noise
             email_content_for_classification = select_simplest_email_content(email.body)
             
-            plain_text_email = get_mail_plain_text(email, email_content_for_classification)
+            plain_text_email = get_email_plain_text(email, email_content_for_classification)
             category = email_categorize.infer(plain_text_email)
             
             emails.append({"category": category, "email": email.subject})
@@ -92,20 +88,26 @@ def select_simplest_email_content(body: List[Part]) -> Part:
     else:
         return fall_back
         
-def extract_email_global_information(message):
-    """extract global information like sender, receiver, date, subject, etc only
+def parse_email(email_json) -> Email:
+    """turn json response object email into our representation of Email
 
     Args:
-        message (json): contains the body and global information
+        email (json): contains the body and global information
+        
+    Returns:
+        Email object
     """
-    mimeType = message["mimeType"]
+    payload = email_json['payload']
+    
+    mimeType = payload["mimeType"]
     subject = ""
     source = ""
     to = ""
     date = ""
+    snippet = email_json['snippet']
     
     # parse headers
-    for h in message["headers"]:
+    for h in email["headers"]:
         header_name = h["name"]
         value = h["value"]
         if header_name == "Subject":
@@ -118,16 +120,17 @@ def extract_email_global_information(message):
             date = value
             
     email = Email(
-        date=date, mimeType=mimeType, source=source, to=to, subject=subject, body=[]
+        date=date, mimeType=mimeType, source=source, to=to, subject=subject, body=parse_email_body(mimeType=mimeType, payload=email), snippet=snippet
     )
+    
     return email
 
-def parse_messages(mimeType, payload) -> List[Part]:
+def parse_email_body(mimeType, payload) -> List[Part]:
     """messagePart is recursive structure hence we need to process the parts field recursively
 
     Args:
         mimeType (str): type of the email
-        payload (str): body of the email
+        payload (str): body of the email, can be of different types depending on mimeType
 
     Returns:
         A single email without the snippet because we are only parsing parts
@@ -140,7 +143,7 @@ def parse_messages(mimeType, payload) -> List[Part]:
         parts = payload['parts']
         for p in parts:
             mimeType = p['mimeType']
-            body.extend(parse_messages(mimeType,p))  # recursively add the payloads
+            body.extend(parse_email_body(mimeType,p))  # recursively add the payloads
     else:
         # non-container MIME message part type
         # uses body
@@ -152,7 +155,7 @@ def parse_messages(mimeType, payload) -> List[Part]:
 
     return body
 
-def get_mail_plain_text(email : Email, part : Part):
+def get_email_plain_text(email : Email, part : Part):
     """parse the email content to at least return a text/plain result
 
     Args:
