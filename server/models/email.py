@@ -20,6 +20,7 @@ class Email:
         self.body = body
         self.snippet = snippet
         self.date = date
+        self.category = ''
 
     def __str__(self):
         body_preview = " ".join(self.body[:])

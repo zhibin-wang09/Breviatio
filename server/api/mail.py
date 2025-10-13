@@ -41,14 +41,14 @@ def get_messages(user_email: str, credentials: Credentials) -> list[Email]:
         if not messages:
             print("No messages found.")
             return
+        
         for message in messages:
             m = messagesAPI.get(userId=user_email, id=message.get("id")).execute()
             snippet = m["snippet"]
             payload = m["payload"]
-            
             # set up email object
             email : Email = extract_email_global_information(payload)
-            body = parse_messages(email.mimeType, payload['parts'])
+            body = parse_messages(email.mimeType, payload)
             email.body = body
             email.snippet = snippet
             
@@ -56,22 +56,41 @@ def get_messages(user_email: str, credentials: Credentials) -> list[Email]:
             # we want to only use the simplest form for classification because it reduces noise
             email_content_for_classification = select_simplest_email_content(email.body)
             
-            plain_text_email = get_mail_plain_text(email_content_for_classification)
+            plain_text_email = get_mail_plain_text(email, email_content_for_classification)
             category = email_categorize.infer(plain_text_email)
+            
             emails.append({"category": category, "email": email.subject})
         return emails
     except HttpError as error:
         print(f"An error occurred: {error}")
         
 def select_simplest_email_content(body: List[Part]) -> Part:
-    simplest_body = None
+    """find text/plain from multi part or if text/plain doesn't exist, find text/html 
+
+    Args:
+        body (List[Part]): _description_
+
+    Returns:
+        Part: _description_
+    """
+
+    text_plain = None
+    text_html = None
+    fall_back = None
     for m in body:
         if m.mimeType == 'text/plain':
-            return m
-        else:
-            simplest_body = m
+            text_plain = m
+        elif m.mimeType == 'text/html':
+            text_html = m
+        elif 'multipart/' in m.mimType: # is multi part
+            fall_back = select_simplest_email_content(m)
     
-    return simplest_body
+    if text_plain:
+        return text_plain
+    elif text_html:
+        return text_html
+    else:
+        return fall_back
         
 def extract_email_global_information(message):
     """extract global information like sender, receiver, date, subject, etc only
@@ -84,7 +103,6 @@ def extract_email_global_information(message):
     source = ""
     to = ""
     date = ""
-    body = []
     
     # parse headers
     for h in message["headers"]:
@@ -104,11 +122,12 @@ def extract_email_global_information(message):
     )
     return email
 
-def parse_messages(mimeType, parts) -> List[Part]:
+def parse_messages(mimeType, payload) -> List[Part]:
     """messagePart is recursive structure hence we need to process the parts field recursively
 
     Args:
-        messagePart (_type_): the payload of a email message
+        mimeType (str): type of the email
+        payload (str): body of the email
 
     Returns:
         A single email without the snippet because we are only parsing parts
@@ -118,26 +137,27 @@ def parse_messages(mimeType, parts) -> List[Part]:
         # container MIME message part type
         # uses field parts[]
         # field body may be empty
-        
+        parts = payload['parts']
         for p in parts:
             mimeType = p['mimeType']
-            body.append(parse_messages(mimeType,p))  # recursively add the payloads
+            body.extend(parse_messages(mimeType,p))  # recursively add the payloads
     else:
         # non-container MIME message part type
         # uses body
-        if "data" in parts["body"]:
-            msg = base64.urlsafe_b64decode(parts["body"]["data"].encode()).decode(
+        if "data" in payload["body"]:
+            msg = base64.urlsafe_b64decode(payload["body"]["data"].encode()).decode(
                 "utf-8", errors="replace"
             )
             body.append(Part(mimeType=mimeType, body=msg))
 
     return body
 
-def get_mail_plain_text(email):
+def get_mail_plain_text(email : Email, part : Part):
     """parse the email content to at least return a text/plain result
 
     Args:
-        email (Email): email representation
+        email (Email): email representation that holds the meta data
+        part (Part): the body of the email
 
     Returns:
         str: text/plain of the email representation
@@ -148,20 +168,13 @@ def get_mail_plain_text(email):
     text += 'From: ' + email.source + '\n'
     text += 'To: ' + email.to + '\n'
     body = ''
-    if email.mimeType == 'text/html':
-        soup = BeautifulSoup(email.body[0], 'html.parser')
+    if part.mimeType == 'text/html':
+        soup = BeautifulSoup(part.body, 'html.parser')
         body = soup.get_text(separator=" ")
         re.sub(r'http[s]?://\S+', '', body)
-    elif email.mimeType == 'text/plain':
-        body = re.sub(r'http[s]?://\S+', '', email.body[0])
-    else:
-        for b in email.body:
-            body = get_mail_plain_text(b)
+    elif part.mimeType == 'text/plain':
+        body = re.sub(r'http[s]?://\S+', '', part.body)
     
     text += body + '\n'
-    # with open('test.json', 'a') as file:
-    #     file.write(text)
-    #     file.write('\n')
-    
     return text
                     
