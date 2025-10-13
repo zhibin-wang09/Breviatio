@@ -1,3 +1,7 @@
+from typing import List
+from server.models.part import Part
+
+
 class Email:
     def __init__(
         self,
@@ -6,7 +10,7 @@ class Email:
         source: str,
         to: str,
         subject: str,
-        body: list,
+        body: List[Part],
         snippet="",
     ):
         self.mimeType = mimeType
@@ -18,7 +22,7 @@ class Email:
         self.date = date
 
     def __str__(self):
-        body_preview = " ".join(self.body[:2]) + ("..." if len(self.body) > 2 else "")
+        body_preview = " ".join(self.body[:])
         return (
             f"Email(\n"
             f"  Date: {self.date}\n"
