@@ -6,11 +6,8 @@ from googleapiclient.errors import HttpError
 from google.oauth2.credentials import Credentials
 import base64
 from server.models.email import Email
-from server.models.model import email_categorize
 from server.models.part import Part
-import jsonpickle
-from bs4 import BeautifulSoup
-import re
+import html2text
 
 
 
@@ -33,7 +30,7 @@ def get_messages(user_email: str, credentials: Credentials) -> list[Email]:
         # Call the Gmail API
         service = build("gmail", "v1", credentials=credentials)
         results = (
-            service.users().messages().list(userId=user_email, maxResults=5).execute()
+            service.users().messages().list(userId=user_email, maxResults=100).execute()
         )
         messagesAPI = service.users().messages()
         messages = results.get("messages", [])
@@ -42,6 +39,7 @@ def get_messages(user_email: str, credentials: Credentials) -> list[Email]:
             print("No messages found.")
             return
         
+        count = 0
         for message in messages:
             email_json = messagesAPI.get(userId=user_email, id=message.get("id")).execute()
 
@@ -51,11 +49,14 @@ def get_messages(user_email: str, credentials: Credentials) -> list[Email]:
             # email now contains all of its payloads
             # we want to only use the simplest form for classification because it reduces noise
             email_content_for_classification = select_simplest_email_content(email.body)
-            
+             
             plain_text_email = get_email_plain_text(email, email_content_for_classification)
-            category = email_categorize.infer(plain_text_email)
+            with open(f'server/emails/email_{count}.json', "+a") as file:
+                file.write(plain_text_email)
+                count += 1
+            # category = email_categorize.infer(plain_text_email)
             
-            emails.append({"category": category, "email": email.subject})
+            # emails.append({"category": category, "email": email.subject})
         return emails
     except HttpError as error:
         print(f"An error occurred: {error}")
@@ -98,7 +99,6 @@ def parse_email(email_json) -> Email:
         Email object
     """
     payload = email_json['payload']
-    
     mimeType = payload["mimeType"]
     subject = ""
     source = ""
@@ -107,7 +107,7 @@ def parse_email(email_json) -> Email:
     snippet = email_json['snippet']
     
     # parse headers
-    for h in email["headers"]:
+    for h in payload["headers"]:
         header_name = h["name"]
         value = h["value"]
         if header_name == "Subject":
@@ -120,7 +120,7 @@ def parse_email(email_json) -> Email:
             date = value
             
     email = Email(
-        date=date, mimeType=mimeType, source=source, to=to, subject=subject, body=parse_email_body(mimeType=mimeType, payload=email), snippet=snippet
+        date=date, mimeType=mimeType, source=source, to=to, subject=subject, body=parse_email_body(mimeType=mimeType, payload=payload), snippet=snippet
     )
     
     return email
@@ -172,11 +172,12 @@ def get_email_plain_text(email : Email, part : Part):
     text += 'To: ' + email.to + '\n'
     body = ''
     if part.mimeType == 'text/html':
-        soup = BeautifulSoup(part.body, 'html.parser')
-        body = soup.get_text(separator=" ")
-        re.sub(r'http[s]?://\S+', '', body)
+        body = html2text.html2text(part.body)
+        print(email.subject, 'html')
     elif part.mimeType == 'text/plain':
-        body = re.sub(r'http[s]?://\S+', '', part.body)
+        # body = re.sub(r'http[s]?://\S+', '', part.body)
+        body = part.body
+        print(email.subject, 'text')
     
     text += body + '\n'
     return text

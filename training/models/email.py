@@ -1,5 +1,5 @@
 from typing import List
-from server.models.part import Part
+from training.models.part import Part
 
 
 class Email:
@@ -20,7 +20,7 @@ class Email:
         self.body = body
         self.snippet = snippet
         self.date = date
-        self.category = ''
+        self._category = ''
 
     def __str__(self):
         body_preview = " ".join(self.body[:])
@@ -35,6 +35,15 @@ class Email:
             f"  Body: {body_preview}\n"
             f")"
     )
+        
+    @property
+    def category(self):
+        return self._category
+        
+    @category.setter
+    def category(self, value):
+        """The setter for the radius attribute."""
+        self._category = value
 
     def __repr__(self):
         return f"<Email subject='{self.subject}' to='{self.to}' date='{self.date}'>"

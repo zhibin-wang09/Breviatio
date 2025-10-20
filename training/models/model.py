@@ -1,6 +1,6 @@
 from ollama import chat
 from ollama import ChatResponse
-from server.models.label import EmailCategory
+from training.models.label import EmailCategory
 
 
 class Model:
