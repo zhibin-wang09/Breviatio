@@ -5,8 +5,8 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from google.oauth2.credentials import Credentials
 import base64
-from server.models.email import Email
-from server.models.part import Part
+from training.models.email import Email
+from training.models.part import Part
 import html2text
 
 
