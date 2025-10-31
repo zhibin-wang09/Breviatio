@@ -1,5 +1,5 @@
 from sqlmodel import create_engine, SQLModel
-from training.models import *
+from server.models import *
 import os
 
 database_url = os.getenv('DB_CONNECTION_STRING')

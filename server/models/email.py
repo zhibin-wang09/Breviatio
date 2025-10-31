@@ -1,5 +1,5 @@
 from typing import List
-from training.models.part import Part
+from server.models.part import Part
 
 
 class Email:

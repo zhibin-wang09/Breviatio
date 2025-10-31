@@ -5,8 +5,8 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from google.oauth2.credentials import Credentials
 import base64
-from training.models.email import Email
-from training.models.part import Part
+from server.models.email import Email
+from server.models.part import Part
 import html2text
 
 
@@ -30,7 +30,7 @@ def get_messages(user_email: str, credentials: Credentials) -> list[Email]:
         # Call the Gmail API
         service = build("gmail", "v1", credentials=credentials)
         results = (
-            service.users().messages().list(userId=user_email, maxResults=100).execute()
+            service.users().messages().list(userId=user_email, maxResults=500).execute()
         )
         messagesAPI = service.users().messages()
         messages = results.get("messages", [])
@@ -51,7 +51,7 @@ def get_messages(user_email: str, credentials: Credentials) -> list[Email]:
             email_content_for_classification = select_simplest_email_content(email.body)
              
             plain_text_email = get_email_plain_text(email, email_content_for_classification)
-            with open(f'server/emails/email_{count}.json', "+a") as file:
+            with open(f'training/emails/email_{count}.json', "+a") as file:
                 file.write(plain_text_email)
                 count += 1
             # category = email_categorize.infer(plain_text_email)
@@ -79,7 +79,7 @@ def select_simplest_email_content(body: List[Part]) -> Part:
             text_plain = m
         elif m.mimeType == 'text/html':
             text_html = m
-        elif 'multipart/' in m.mimType: # is multi part
+        elif 'multipart/' in m.mimeType: # is multi part
             fall_back = select_simplest_email_content(m)
     
     if text_plain:

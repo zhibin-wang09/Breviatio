@@ -1,0 +1,117 @@
+[
+  {
+    "category": {
+      "model": "mistral",
+      "created_at": "2025-10-13T19:30:49.202935Z",
+      "done": true,
+      "done_reason": "stop",
+      "total_duration": 10219149500,
+      "load_duration": 32465625,
+      "prompt_eval_count": 763,
+      "prompt_eval_duration": 3917907833,
+      "eval_count": 126,
+      "eval_duration": 6222657333,
+      "message": {
+        "role": "assistant",
+        "content": " The given email can be classified under the 'Job' category. This is due to the numerous job postings mentioned in the email, such as \"IMC Trading AMS - 2026 - Graduate Hardware Engineer,\" \"NVIDIA Post-Silicon Validation Engineer - New College Graduate 2026,\" and \"Hudson River Trading Algorithm Developer (Quant Researcher) â€“ 2026 Grads.\" These job postings indicate that the email is related to job opportunities, making it a suitable match for the 'Job' category.",
+        "thinking": null,
+        "images": null,
+        "tool_name": null,
+        "tool_calls": null
+      }
+    },
+    "email": "Found 26 new job postings!"
+  },
+  {
+    "category": {
+      "model": "mistral",
+      "created_at": "2025-10-13T19:31:06.97827Z",
+      "done": true,
+      "done_reason": "stop",
+      "total_duration": 17539467625,
+      "load_duration": 31345459,
+      "prompt_eval_count": 2980,
+      "prompt_eval_duration": 4589658208,
+      "eval_count": 57,
+      "eval_duration": 3143366503,
+      "message": {
+        "role": "assistant",
+        "content": " This email does not fit into any of the provided categories (Scheduling, Question, Marketing, Job, Request, Classes). It appears to be a notification from Reddit regarding various posts on different subreddits. Therefore, it can be categorized as 'Other'.",
+        "thinking": null,
+        "images": null,
+        "tool_name": null,
+        "tool_calls": null
+      }
+    },
+    "email": "\"Why guys cheat this much\""
+  },
+  {
+    "category": {
+      "model": "mistral",
+      "created_at": "2025-10-13T19:31:22.704871Z",
+      "done": true,
+      "done_reason": "stop",
+      "total_duration": 15488341083,
+      "load_duration": 27935125,
+      "prompt_eval_count": 2306,
+      "prompt_eval_duration": 3585056333,
+      "eval_count": 90,
+      "eval_duration": 4753241706,
+      "message": {
+        "role": "assistant",
+        "content": " This email appears to be about Exhibitions, specifically it mentions two ongoing exhibitions at The Met Museum: 'Divine Egypt' and 'Spectrum of Desire: Love, Sex, and Gender in the Middle Ages'. Therefore, the category that best fits this email is 'Classes'. However, since the primary focus is on museum exhibitions rather than educational classes, it could also be considered under 'Exhibitions'.",
+        "thinking": null,
+        "images": null,
+        "tool_name": null,
+        "tool_calls": null
+      }
+    },
+    "email": "Exhibitions: October 2025"
+  },
+  {
+    "category": {
+      "model": "mistral",
+      "created_at": "2025-10-13T19:31:31.374477Z",
+      "done": true,
+      "done_reason": "stop",
+      "total_duration": 8466225542,
+      "load_duration": 24253667,
+      "prompt_eval_count": 1417,
+      "prompt_eval_duration": 4114118500,
+      "eval_count": 39,
+      "eval_duration": 1982680168,
+      "message": {
+        "role": "assistant",
+        "content": " The email can be classified as 'Marketing'. The American Museum of Natural History is offering a membership to the recipient, and they are encouraging them to visit again by providing an incentive.",
+        "thinking": null,
+        "images": null,
+        "tool_name": null,
+        "tool_calls": null
+      }
+    },
+    "email": "Thanks for Visiting!"
+  },
+  {
+    "category": {
+      "model": "mistral",
+      "created_at": "2025-10-13T19:31:46.790372Z",
+      "done": true,
+      "done_reason": "stop",
+      "total_duration": 15194896542,
+      "load_duration": 20179792,
+      "prompt_eval_count": 2788,
+      "prompt_eval_duration": 3754956292,
+      "eval_count": 28,
+      "eval_duration": 1477118420,
+      "message": {
+        "role": "assistant",
+        "content": " The email can be classified as 'Question'. The user is seeking help or advice regarding their job application process and not getting any interviews.",
+        "thinking": null,
+        "images": null,
+        "tool_name": null,
+        "tool_calls": null
+      }
+    },
+    "email": "\"I give up\""
+  }
+]

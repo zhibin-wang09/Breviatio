@@ -6,13 +6,13 @@ from fastapi.encoders import jsonable_encoder
 import jsonpickle
 from datetime import datetime, timezone, timedelta
 
-from training.api import auth as authorize
-from training.api import mail
-from training.db.redis import rd
+from server.api import auth as authorize
+from server.api import mail
+from server.db.redis import rd
 
 import os
 
-from training.models.user import User
+from server.models.user import User
 
 app = FastAPI()
 
