@@ -51,7 +51,7 @@ def get_messages(user_email: str, credentials: Credentials) -> list[Email]:
             email_content_for_classification = select_simplest_email_content(email.body)
              
             plain_text_email = get_email_plain_text(email, email_content_for_classification)
-            with open(f'training/emails/email_{count}.json', "+a") as file:
+            with open(f'training/emails/email_{count}.txt', "+a") as file:
                 file.write(plain_text_email)
                 count += 1
             # category = email_categorize.infer(plain_text_email)
